@@ -1,7 +1,7 @@
 name: Build Windows Installer
 
 on:
-  workflow_dispatch:   # lets you click "Run workflow" manually
+  workflow_dispatch:
   push:
     branches: [ main ]
 
@@ -19,18 +19,19 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: Publish app
-        working-directory: LadderToArduino/LadderToArduino
-        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish
+        run: dotnet publish LadderToArduino.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish
+        shell: cmd
 
       - name: Install Inno Setup
         run: choco install innosetup -y
+        shell: cmd
 
       - name: Compile installer
-        working-directory: LadderToArduino/LadderToArduino
-        run: iscc setup.iss
+        run: '"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss'
+        shell: cmd
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
           name: LadderToArduino-Setup
-          path: LadderToArduino/LadderToArduino/Output/LadderToArduino-Setup.exe
+          path: Output/*.exe
